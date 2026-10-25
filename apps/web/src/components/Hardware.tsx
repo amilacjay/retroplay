@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { PhotoReel } from './machines/parts';
+import { COVER_FRAME, IMAGES } from './machines/assets';
 
 export type PlayerTheme = 'cassette' | 'vinyl';
 export type CoverFit = 'cover' | 'fit-width' | 'fit-height' | 'stretch' | 'title';
@@ -32,7 +33,7 @@ export function PhotoKey({ box, image, label, onClick, disabled, latched = false
   </button>;
 }
 
-const DECK_IMAGE = '/assets/retro-play-cassette-deck.png';
+const DECK_IMAGE = IMAGES.cassetteDeck;
 const TAPE_KEYS: { box: Box; label: string; action: 'stop' | 'previous' | 'play' | 'next' | 'restart' | 'pause' }[] = [
   { box: [18.29, 64.84, 7.0, 8.79], label: 'Stop', action: 'stop' },
   { box: [25.65, 64.70, 6.48, 8.94], label: 'Rewind · previous track', action: 'previous' },
@@ -53,7 +54,7 @@ function horizontalOverflow(windowEl: HTMLElement, image: HTMLImageElement) {
 }
 
 export function AlbumCoverPreview({ theme, artwork, title, fit, showTitle, position, onPositionChange, pan = 50, onPanChange }: { theme: PlayerTheme; artwork: string; title: string; fit: CoverFit; showTitle: boolean; position: CoverPosition; onPositionChange: (position: CoverPosition) => void; pan?: number; onPanChange?: (pan: number) => void }) {
-  const frame = theme === 'vinyl' ? '/assets/retro-play-vinyl-cardboard-sleeve.png' : '/assets/retro-play-cassette-case.png';
+  const frame = COVER_FRAME[theme];
   const drag = useRef<{ pointer: number; x: number; y: number; left: number; top: number } | null>(null);
   const panDrag = useRef<{ pointer: number; x: number; pan: number; overflow: number } | null>(null);
   const image = useRef<HTMLImageElement>(null);
@@ -123,12 +124,12 @@ export function VinylDeck({ machine: props }: { machine: MachineControlProps; ti
   const toggle = playing ? props.onPause : props.onPlay;
   const toggleDisabled = playing ? !props.canPause : !props.canPlay;
   // Cut-outs must come from whichever photo is showing: the resting photo has the headshell parked over the cue lever.
-  const plinth = playing ? '/assets/retro-play-turntable.png' : '/assets/retro-play-turntable-platter.png';
+  const plinth = playing ? IMAGES.turntablePlaying : IMAGES.turntableResting;
   return <div className={`hardware-product vinyl-product ${playing ? 'is-playing' : ''}`} role="group" aria-label="Turntable controls">
-    <img className="hardware-image" src="/assets/retro-play-turntable-platter.png" alt="" draggable={false}/>
-    <img className="hardware-image turntable-playing-art" src="/assets/retro-play-turntable.png" alt="" aria-hidden="true" draggable={false}/>
-    <svg className="turntable-tonearm" viewBox="0 0 1536 1024" preserveAspectRatio="none" aria-hidden="true"><defs><clipPath id="tonearm-cutout" clipPathUnits="userSpaceOnUse"><path d="M1281 215 C1277 267 1269 323 1256 365 C1248 390 1228 408 1203 423 C1178 438 1150 450 1121 456 L1116 441 C1145 434 1173 422 1195 408 C1216 394 1233 377 1241 357 C1254 320 1260 264 1265 219 Z M1127 425 L1112 439 L1096 429 L1084 423 L1002 437 L969 447 L944 461 L950 480 L970 486 L975 501 L998 501 L1006 484 L1087 475 L1100 464 L1127 452 Z"/></clipPath></defs><image href="/assets/retro-play-turntable.png" width="1536" height="1024" clipPath="url(#tonearm-cutout)"/></svg>
-    <div className="record-plane" aria-hidden="true"><img className="record-disc" src="/assets/retro-play-vinyl-record.png" alt="" draggable={false} style={{ transform: 'rotate(var(--platter, 0deg))' }}/></div>
+    <img className="hardware-image" src={IMAGES.turntableResting} alt="" draggable={false}/>
+    <img className="hardware-image turntable-playing-art" src={IMAGES.turntablePlaying} alt="" aria-hidden="true" draggable={false}/>
+    <svg className="turntable-tonearm" viewBox="0 0 1536 1024" preserveAspectRatio="none" aria-hidden="true"><defs><clipPath id="tonearm-cutout" clipPathUnits="userSpaceOnUse"><path d="M1281 215 C1277 267 1269 323 1256 365 C1248 390 1228 408 1203 423 C1178 438 1150 450 1121 456 L1116 441 C1145 434 1173 422 1195 408 C1216 394 1233 377 1241 357 C1254 320 1260 264 1265 219 Z M1127 425 L1112 439 L1096 429 L1084 423 L1002 437 L969 447 L944 461 L950 480 L970 486 L975 501 L998 501 L1006 484 L1087 475 L1100 464 L1127 452 Z"/></clipPath></defs><image href={IMAGES.turntablePlaying} width="1536" height="1024" clipPath="url(#tonearm-cutout)"/></svg>
+    <div className="record-plane" aria-hidden="true"><img className="record-disc" src={IMAGES.vinylRecord} alt="" draggable={false} style={{ transform: 'rotate(var(--platter, 0deg))' }}/></div>
     <PhotoKey kind="push" box={[10.68, 54.39, 6.25, 6.15]} image={plinth} label={`Start · ${toggleLabel}`} onClick={toggle} disabled={toggleDisabled} latched={playing}/>
     <PhotoKey kind="push" box={[8.27, 61.52, 2.15, 1.86]} image={plinth} label="Previous track" onClick={props.onPrevious} disabled={!props.canPrevious}/>
     <PhotoKey kind="push" box={[91.34, 61.43, 1.95, 1.95]} image={plinth} label="Next track" onClick={props.onNext} disabled={!props.canNext}/>

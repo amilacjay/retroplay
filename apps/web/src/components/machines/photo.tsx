@@ -1,6 +1,7 @@
 import { PhotoKey, pxBox, type Box } from '../Hardware';
 import type { SkinProps } from './skins';
 import { topDownArm } from './motion';
+import { IMAGES } from './assets';
 
 /*
  * Photo-real models built from generated product photos (public/assets/models). All coordinates are pixels in the
@@ -37,8 +38,8 @@ function PhotoReelOverlay({ spec }: { spec: ReelSpec }) {
 }
 
 /* ---------- Pocket Stereo ---------- */
-const POCKET = '/assets/models/pocket-stereo.png';
-const POCKET_BASE = '/assets/models/pocket-stereo-base.png';
+const POCKET = IMAGES.pocket;
+const POCKET_BASE = IMAGES.pocketBase;
 const POCKET_KEYS: { box: Box; label: string; action: 'stop' | 'previous' | 'play' | 'next' }[] = [
   { box: pxBox(226, 84, 341, 170), label: 'Stop', action: 'stop' },
   { box: pxBox(357, 82, 467, 170), label: 'Rewind · previous track', action: 'previous' },
@@ -62,8 +63,8 @@ export function PocketPhoto({ machine: m }: SkinProps) {
 }
 
 /* ---------- Boombox ---------- */
-const BOOM = '/assets/models/boombox.png';
-const BOOM_BASE = '/assets/models/boombox-base.png';
+const BOOM = IMAGES.boombox;
+const BOOM_BASE = IMAGES.boomboxBase;
 const BOOM_KEYS: { box: Box; label: string; action: 'restart' | 'play' | 'previous' | 'next' | 'stop' | 'pause' }[] = [
   { box: pxBox(479, 265, 575, 318), label: 'Record · restart track', action: 'restart' },
   { box: pxBox(579, 265, 669, 318), label: 'Play', action: 'play' },
@@ -99,9 +100,9 @@ export function BoomboxPhoto({ machine: m }: SkinProps) {
 }
 
 /* ---------- Suitcase Player ---------- */
-const SUIT_BASE = '/assets/models/suitcase-base.png';
-const SUIT = '/assets/models/suitcase-rest.png';
-const SUIT_ARM = '/assets/models/suitcase-arm.png';
+const SUIT_BASE = IMAGES.suitcaseBase;
+const SUIT = IMAGES.suitcaseRest;
+const SUIT_ARM = IMAGES.suitcaseArm;
 // Platter top ellipse fitted to the photo: centre (659, 510), semi-axes 349 × 133 → plane tilt cos⁻¹(0.381) ≈ 67.6°.
 const PLATTER = { cx: 659, cy: 510, k: 0.381, record: 340 };
 const ARM_PIVOT: [number, number] = [1232, 482];
@@ -146,7 +147,7 @@ export function SuitcasePhoto({ machine: m }: SkinProps) {
   return <div className={`hardware-product photo-model suitcase-photo ${m.playing ? 'is-playing' : ''}`} role="group" aria-label="Suitcase record player controls">
     <img className="hardware-image" src={SUIT_BASE} alt="" draggable={false}/>
     <div className="photo-record-plane" aria-hidden="true" style={{ left: pct(PLATTER.cx, IMG_W), top: pct(PLATTER.cy, IMG_H), width: pct(recordWidth, IMG_W), transform: `translate(-50%, -50%) rotateX(${Math.acos(PLATTER.k) * 180 / Math.PI}deg)` }}>
-      <img className="record-disc" src="/assets/retro-play-vinyl-record.png" alt="" draggable={false} style={{ transform: 'rotate(var(--platter, 0deg))' }}/>
+      <img className="record-disc" src={IMAGES.vinylRecord} alt="" draggable={false} style={{ transform: 'rotate(var(--platter, 0deg))' }}/>
     </div>
     <span className="photo-spindle" aria-hidden="true" style={{ left: pct(646, IMG_W), top: pct(458, IMG_H), width: pct(27, IMG_W), height: pct(46, IMG_H), backgroundImage: `url(${SUIT})`, backgroundSize: `${IMG_W / 27 * 100}% ${IMG_H / 46 * 100}%`, backgroundPosition: `${646 / (IMG_W - 27) * 100}% ${458 / (IMG_H - 46) * 100}%` }}/>
     {/* Tube: turn about the pivot and stretch along its own axis. Headshell: follow the joint rigidly. The cue lifts both. */}

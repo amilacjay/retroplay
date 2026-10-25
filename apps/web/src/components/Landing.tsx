@@ -1,6 +1,9 @@
 import type { SharedPlaylist } from '../lib/api';
 import type { Toast } from '../hooks/useToasts';
+import { useEffect, useRef, useState } from 'react';
 import { Toasts, type Appearance } from './Chrome';
+import { IMAGES } from './machines/assets';
+import { decodeImage } from '../lib/preload';
 import { CassetteIcon, LinkIcon, MoonIcon, MusicIcon, RefreshIcon, SunIcon, UserIcon } from './Icons';
 
 type LandingProps = {
@@ -53,8 +56,8 @@ export function Landing({ appearance, onAppearance, signInHref, signInAvailable,
         </div>
 
         <div className="landing-art" aria-hidden="true">
-          <img className="landing-deck" src="/assets/retro-play-cassette-deck.png" alt=""/>
-          <img className="landing-turntable" src="/assets/retro-play-turntable.png" alt=""/>
+          <FadeImage className="landing-deck" src={IMAGES.cassetteDeck}/>
+          <FadeImage className="landing-turntable" src={IMAGES.turntablePlaying}/>
         </div>
       </section>
 
@@ -74,4 +77,19 @@ export function Landing({ appearance, onAppearance, signInHref, signInAvailable,
 /** Shown for the moment the session check takes, so signed-in users don't see the landing page flash past. */
 export function Splash() {
   return <div className="splash" role="status" aria-label="Loading Retro Play"><span className="brand-mark" aria-hidden="true"><i/><i/></span></div>;
+}
+
+/** A decorative image that appears once fully decoded, instead of painting in as it downloads. */
+function FadeImage({ className, src }: { className: string; src: string }) {
+  const ref = useRef<HTMLImageElement>(null);
+  const [loaded, setLoaded] = useState(false);
+  useEffect(() => {
+    const image = ref.current;
+    if (!image) return;
+    let live = true;
+    // Also covers an image that finished from cache before React attached a load handler.
+    void decodeImage(image).then(() => { if (live) setLoaded(true); });
+    return () => { live = false; };
+  }, [src]);
+  return <img ref={ref} className={`${className} fade-image ${loaded ? 'is-loaded' : ''}`} src={src} alt="" decoding="async"/>;
 }

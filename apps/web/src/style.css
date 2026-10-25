@@ -376,6 +376,24 @@ kbd { display: inline-grid; place-items: center; min-width: 24px; height: 24px; 
 .key-sep { color: var(--faint); font-size: 12px; }
 .dialog-foot { margin: 0; padding: 10px 22px 18px; color: var(--muted); font-size: 12.5px; }
 
+/* ---------- Model setup (shown while a player's photos download and decode) ---------- */
+.machine-setup { position: absolute; inset: 0; z-index: 4; display: grid; place-content: center; justify-items: center; gap: 10px; text-align: center; opacity: 0; transition: opacity .2s ease; }
+.machine-setup.is-visible { opacity: 1; }
+.machine-setup strong { font: 500 clamp(17px, 2vw, 22px) var(--serif); color: var(--ink); }
+.machine-setup small { color: var(--muted); font: 500 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+.setup-icon { display: inline-grid; place-items: center; width: 64px; height: 64px; border-radius: 50%; background: var(--surface); border: 1px solid var(--line-soft); box-shadow: var(--shadow-1); color: var(--accent); }
+.setup-icon svg { width: 30px; height: 30px; }
+.setup-vinyl svg { animation: setup-spin 2.4s linear infinite; }
+.setup-cassette svg { animation: pulse 1.6s ease-in-out infinite; }
+.setup-bar { display: block; width: min(260px, 60vw); height: 4px; overflow: hidden; border-radius: 4px; background: var(--line-soft); }
+.setup-bar i { display: block; height: 100%; border-radius: inherit; background: var(--accent); transition: width .25s ease; }
+@keyframes setup-spin { to { transform: rotate(360deg); } }
+/* The model and its album case fade in together once everything is decoded. */
+.machine-frame > .machine-motion, .machine-frame > .album-cover-preview { animation: model-in .35s ease both; }
+@keyframes model-in { from { opacity: 0; } }
+.fade-image { opacity: 0; transition: opacity .4s ease; }
+.fade-image.is-loaded { opacity: 1; }
+
 /* ---------- Landing (signed-out visitors) ---------- */
 .splash { height: 100dvh; display: grid; place-items: center; }
 .splash .brand-mark { transform: scale(1.6); animation: pulse 1.6s ease-in-out infinite; }

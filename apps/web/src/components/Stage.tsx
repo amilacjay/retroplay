@@ -5,7 +5,10 @@ import { formatDuration, spotifyUrl } from '../lib/format';
 import { AlbumCoverPreview, type CoverFit, type CoverPosition, type MachineControlProps, type PlayerTheme } from './Hardware';
 import { AlertIcon, BoomboxIcon, PlayIcon, CassetteIcon, CheckIcon, CloseIcon, DjIcon, ExternalIcon, PocketIcon, RefreshIcon, SlidersIcon, SuitcaseIcon, VinylIcon } from './Icons';
 import { Popover } from './Popover';
-import { Machine, skinsFor, type Skin, type SkinId } from './machines/skins';
+import { Machine, SKINS, skinsFor, type Skin, type SkinId } from './machines/skins';
+import { modelAssets } from './machines/assets';
+import { prefetchImages, useImagePreload } from '../lib/preload';
+import { useEffect, useState } from 'react';
 
 const SKIN_ICONS: Record<SkinId, (props: { className?: string }) => React.ReactElement> = { 'hifi-deck': CassetteIcon, pocket: PocketIcon, boombox: BoomboxIcon, 'hifi-turntable': VinylIcon, suitcase: SuitcaseIcon, dj: DjIcon };
 
@@ -27,6 +30,7 @@ export function Stage(props: StageProps) {
   const track = playback?.track_window.current_track;
   const playing = Boolean(playback && !playback.paused);
   const trackLink = spotifyUrl(track?.uri);
+  const setup = useModelSetup(props.skin);
   return <section className={`stage theme-${theme} ${playing ? 'is-playing' : ''}`} aria-label="Player">
     <div className="stage-toolbar">
       <div className="segmented" role="radiogroup" aria-label="Choose your machine">
@@ -69,9 +73,10 @@ export function Stage(props: StageProps) {
 
     <div className={`stage-machine stage-machine-${theme}`}>
       <div className="machine-frame">
-        {props.artwork && <AlbumCoverPreview theme={theme} artwork={props.artwork} title={props.coverTitle} fit={props.cover.fit} showTitle={props.cover.showTitle} position={props.cover.position} onPositionChange={props.cover.onPosition} pan={props.cover.pan} onPanChange={props.cover.onPan}/>}
-        <Machine key={props.skin.id} skin={props.skin} machine={props.machine} title={track?.name ?? props.coverTitle}
-          motion={{ playing, position: playback?.position ?? 0, duration: playback?.duration ?? 0, trackKey: track?.uri }}/>
+        {!setup.ready && <MachineSetup skin={props.skin} progress={setup.progress} visible={setup.slow}/>}
+        {setup.ready && props.artwork && <AlbumCoverPreview theme={theme} artwork={props.artwork} title={props.coverTitle} fit={props.cover.fit} showTitle={props.cover.showTitle} position={props.cover.position} onPositionChange={props.cover.onPosition} pan={props.cover.pan} onPanChange={props.cover.onPan}/>}
+        {setup.ready && <Machine key={props.skin.id} skin={props.skin} machine={props.machine} title={track?.name ?? props.coverTitle}
+          motion={{ playing, position: playback?.position ?? 0, duration: playback?.duration ?? 0, trackKey: track?.uri }}/>}
       </div>
     </div>
 
@@ -106,6 +111,39 @@ function Welcome({ account }: { account: Account }) {
       <li>Needs Spotify <b>Premium</b> for in-browser playback</li>
       <li>You do this once — Retro Play remembers the connection</li>
     </ul>
+  </div>;
+}
+
+/**
+ * Downloads and decodes everything the chosen model paints before it is shown, so it appears whole instead of painting
+ * in strip by strip on slow connections. The setup panel only appears if that takes longer than a moment (a cached
+ * model shows straight away), and once the model is up the other models are fetched quietly for instant switching.
+ */
+function useModelSetup(skin: Skin) {
+  const { ready, progress } = useImagePreload(modelAssets(skin.id, skin.machine));
+  const [slow, setSlow] = useState(false);
+  useEffect(() => {
+    setSlow(false);
+    if (ready) return;
+    const timer = window.setTimeout(() => setSlow(true), 180);
+    return () => window.clearTimeout(timer);
+  }, [skin.id, ready]);
+  useEffect(() => {
+    if (!ready) return;
+    const others = SKINS.filter(other => other.id !== skin.id).sort((a, b) => Number(b.machine === skin.machine) - Number(a.machine === skin.machine));
+    prefetchImages(others.flatMap(other => modelAssets(other.id, other.machine)));
+  }, [ready, skin.id]);
+  return { ready, progress, slow };
+}
+
+function MachineSetup({ skin, progress, visible }: { skin: Skin; progress: number; visible: boolean }) {
+  const Icon = SKIN_ICONS[skin.id];
+  const percent = Math.round(progress * 100);
+  return <div className={`machine-setup ${visible ? 'is-visible' : ''}`} role="status" aria-live="polite">
+    <span className={`setup-icon setup-${skin.machine}`} aria-hidden="true"><Icon/></span>
+    <strong>Setting up the {skin.name}…</strong>
+    <span className="setup-bar" role="progressbar" aria-label={`Setting up the ${skin.name}`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={percent}><i style={{ width: `${Math.max(4, percent)}%` }}/></span>
+    <small>{percent < 100 ? `${percent}% · unpacking the hardware` : 'Warming up'}</small>
   </div>;
 }
 

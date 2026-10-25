@@ -8,10 +8,11 @@
 | Suitcase Player | Photo: `suitcase-rest.png`, calibrated. **No "playing" image is needed**: the tonearm is lifted out of the photo and animated. |
 | DJ Deck | Still drawn (SVG). Needs `dj-rest.png` only (see section 4) |
 
-Save new images in `apps/web/public/assets/models/` under the exact file names given. After that:
+Save new images in `apps/web/art/models/` (the PNG sources, which are not shipped) under the exact file names given. After that:
 
 1. Measure every key, reel, platter, and knob in pixels. These go in `apps/web/src/components/machines/photo.tsx`.
-2. Regenerate the derived layers with `apps/web/scripts/derive-model-layers.ps1`. These are the copies with keys cleared, the knob removed, or the tonearm lifted out.
+2. Regenerate the derived layers with `apps/web/scripts/derive-model-layers.ps1 -Dir .\art\models`. These are the copies with keys cleared, the knob removed, or the tonearm lifted out.
+3. Run `npm run images` in `apps/web` to write the WebP files the app ships to `public/assets/`, and list any new file in `src/components/machines/assets.ts`.
 
 Ask Claude Code to "calibrate the new model photos".
 

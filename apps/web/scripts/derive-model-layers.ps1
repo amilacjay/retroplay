@@ -1,5 +1,6 @@
-# Builds the derived layers for the photo models from the generated PNGs in public/assets/models.
-# Usage (Windows PowerShell, from apps/web): .\scripts\derive-model-layers.ps1 -Dir .\public\assets\models
+# Builds the derived layers for the photo models from the generated PNG sources in art/models.
+# Usage (Windows PowerShell, from apps/web): .\scripts\derive-model-layers.ps1 -Dir .\art\models
+# Then run `npm run images` to regenerate the shipped WebP files in public/assets.
 # Outputs: pocket-stereo-base.png (keys cleared), boombox-base.png (volume knob removed),
 #          suitcase-base.png (tonearm removed) and suitcase-arm.png (the tonearm, matted).
 # Coordinates are pixels in the 1536x1024 photos; see src/components/machines/photo.tsx for how each layer is used.

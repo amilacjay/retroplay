@@ -70,13 +70,15 @@ There is no linter or formatter configured. API specs and `src/test/` helpers ar
 - Machine models (`components/machines/`):
   - `skins.tsx` is the registry: three cassette models and three vinyl models, each with a default album-case position and an optional tonearm mapping. Its `Machine` wrapper runs `useMachineMotion`.
   - The chosen model is stored per machine (`retro-play-skins`), and the album-case position per model (`retro-play-cover-positions-v3`).
-  - Photo models: `CassetteDeck` and `VinylDeck` live in `Hardware.tsx`; `PocketPhoto`, `BoomboxPhoto`, and `SuitcasePhoto` live in `machines/photo.tsx`. All of them use generated 1536×1024 PNGs, and every coordinate is a pixel measured from the photo.
+  - Photo models: `CassetteDeck` and `VinylDeck` live in `Hardware.tsx`; `PocketPhoto`, `BoomboxPhoto`, and `SuitcasePhoto` live in `machines/photo.tsx`. All of them use generated 1536×1024 photos, and every coordinate is a pixel measured from the photo.
   - Derived layers are built by `apps/web/scripts/derive-model-layers.ps1` (Windows PowerShell + System.Drawing):
     - pocket keys cleared
     - boombox knob removed, with the plate rows blended and the ticks restored
     - suitcase arm lifted out: the platter rim is refilled along its ellipse, the deck by rows, and the arm matted against the refilled base
     
     Re-run the script if a source photo changes.
+  - Images: PNG sources live in `apps/web/art/` (not shipped). `npm run images` (`scripts/optimize-images.mjs`, sharp) writes same-size WebP files to `public/assets/` (about 35 MB of PNG becomes about 3 MB). Every image URL comes from `machines/assets.ts` (`IMAGES`, `COVER_FRAME`); `modelAssets(id, machine)` lists what a model paints, so add new images there.
+  - Loading: `Stage` gates the model and its album case on `useImagePreload` (`lib/preload.ts`), which downloads each image once with byte progress, decodes it, then reveals everything together. If that takes over 180 ms, a "Setting up the …" panel shows. Once a model is ready, `prefetchImages` warms the other models one at a time when the browser is idle (skipped with Save-Data), so switching is instant. Use `decodeImage` (it falls back to the load event) instead of calling `img.decode()` directly, because jsdom has no `decode()`.
   - Cassette reels on photos (`PhotoReelOverlay`): an empty-interior layer, then a drawn tape pack scaled from `--pack-*`, then the photo's own hub turning on top.
   - The suitcase tonearm swings in the deck plane. `toDeck` stretches y by 1/k, where k is the platter ellipse's minor/major ratio. `suitcaseArmVars` publishes `--tube-turn`, `--tube-stretch`, `--head-x`, and `--head-y` (via the engine's `armVars` option):
     - The tube is a drawn chrome cylinder, because rotating the photo's tube aliases.
@@ -93,7 +95,7 @@ There is no linter or formatter configured. API specs and `src/test/` helpers ar
   - Latching: Play stays down while playing; Pause and Play stay down while paused (`paused` on `MachineControlProps`); the turntable start button stays in while it spins.
   - On the turntable, cut-outs must come from whichever photo is showing (resting or playing), since they differ around the cue lever.
   - Re-measure the boxes if a photo changes. `docs/model-photos.md` has the image prompts and which models still need photos (the DJ Deck).
-- Hardware decks: transparent hitbox buttons and a range input are absolutely positioned (in %) over the PNGs in `public/assets/`. Those percentages are tuned to the photos, so don't change them casually. `.machine-frame` is sized with container-query units (`min(100cqw, 150cqh)`, 3:2) so the overlays stay aligned at every size. The album sleeve's saved position is a percentage of that frame. The J-card art window uses paper bounds measured from `retro-play-cassette-case.png` (left 14.01%, top 8.07%, 76.55% × 81.67%). In "fit height" the art fills the full card with `object-fit: cover`; dragging the art changes `object-position` (the pan, stored per machine) instead of moving the case.
+- Hardware decks: transparent hitbox buttons and a range input are absolutely positioned (in %) over the photos in `public/assets/`. Those percentages are tuned to the photos, so don't change them casually. `.machine-frame` is sized with container-query units (`min(100cqw, 150cqh)`, 3:2) so the overlays stay aligned at every size. The album sleeve's saved position is a percentage of that frame. The J-card art window uses paper bounds measured from `retro-play-cassette-case.png` (left 14.01%, top 8.07%, 76.55% × 81.67%). In "fit height" the art fills the full card with `object-fit: cover`; dragging the art changes `object-position` (the pan, stored per machine) instead of moving the case.
 - Styling: `style.css` is token-based. Light tokens sit on `:root`; dark tokens override them under `:root[data-theme="dark"]`, which `App` sets. Breakpoints:
   - ≤1180px: two columns, with the side panel swapped via `.mobile-nav`
   - ≤760px: one view at a time
