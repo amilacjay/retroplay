@@ -1,9 +1,9 @@
+import { useEffect, useRef, useState } from 'react';
 import type { SharedPlaylist } from '../lib/api';
 import type { Toast } from '../hooks/useToasts';
-import { useEffect, useRef, useState } from 'react';
+import { decodeImage } from '../lib/preload';
 import { Toasts, type Appearance } from './Chrome';
 import { IMAGES } from './machines/assets';
-import { decodeImage } from '../lib/preload';
 import { CassetteIcon, LinkIcon, MoonIcon, MusicIcon, RefreshIcon, SunIcon, UserIcon } from './Icons';
 
 type LandingProps = {
@@ -12,63 +12,65 @@ type LandingProps = {
 };
 
 const FEATURES: [typeof CassetteIcon, string, string][] = [
-  [CassetteIcon, 'Real hardware, in your browser', 'Six cassette decks and turntables with working keys, turning reels, and a tonearm that follows the track.'],
-  [RefreshIcon, 'Picks up where you left off', 'Your deck, theme, and the song you were playing are saved to your profile and waiting next time.'],
-  [LinkIcon, 'Share a playlist with a link', 'Send any public Spotify playlist as a Retro Play link. Friends sign in and play it on their own deck.'],
+  [CassetteIcon, 'Real hardware', 'Tape decks and turntables with working keys and turning reels.'],
+  [RefreshIcon, 'Picks up where you left off', 'Your deck, theme, and last song wait on your profile.'],
+  [LinkIcon, 'Share with a link', 'Send a public playlist; friends play it on their own deck.'],
 ];
 
-/** The page signed-out visitors see: what Retro Play is, and one way in (Google sign-in). */
+/**
+ * The page signed-out visitors see. It is one screen by design: it never scrolls, so the pitch and the single way in
+ * (Google sign-in) are visible at first sight. On short screens the less important parts drop out instead.
+ */
 export function Landing({ appearance, onAppearance, signInHref, signInAvailable, invite, inviteError, toasts, onDismissToast }: LandingProps) {
-  const signIn = <a className="primary-button big" href={signInHref} aria-disabled={!signInAvailable}><UserIcon/> Sign in with Google</a>;
   return <div className="landing">
-    <header className="topbar landing-bar">
+    <header className="landing-bar landing-wrap">
       <a className="brand" href="/" aria-label="Retro Play home"><span className="brand-mark" aria-hidden="true"><i/><i/></span><span>retro<span className="brand-play">play</span><span className="brand-dot">.</span></span></a>
-      <div className="top-actions">
+      <div className="landing-bar-actions">
         <button type="button" className="icon-button" onClick={onAppearance} aria-label={appearance === 'dark' ? 'Switch to day mode' : 'Switch to night mode'} title={appearance === 'dark' ? 'Day mode' : 'Night mode'}>{appearance === 'dark' ? <SunIcon/> : <MoonIcon/>}</button>
-        <a className="primary-button" href={signInHref} aria-disabled={!signInAvailable}><UserIcon/><span>Sign in</span></a>
+        <a className="ghost-button landing-signin" href={signInHref} aria-disabled={!signInAvailable}>Sign in</a>
       </div>
     </header>
 
-    <main className="landing-main">
-      <section className="landing-hero" aria-labelledby="landing-title">
-        <div className="landing-copy">
-          <span className="eyebrow"><i className="status-dot" aria-hidden="true"/>{invite ? 'A playlist was shared with you' : 'Your listening room'}</span>
-          <h1 id="landing-title" className="landing-title">{invite ? <>Press play on <em>{invite.playlist.name}</em>.</> : <>Choose your machine.<br/>Press play.</>}</h1>
-          <p className="landing-lede">{invite
-            ? `${invite.sharedBy} shared this playlist with you on Retro Play. Sign in, connect your Spotify Premium account, and it will be waiting on your deck.`
-            : 'Stream your Spotify playlists through a tape deck or a turntable. Real buttons, real ritual, right in your browser.'}</p>
+    <main className="landing-main landing-wrap">
+      <section className="landing-copy" aria-labelledby="landing-title">
+        <span className="eyebrow"><i className="status-dot" aria-hidden="true"/>{invite ? 'A playlist was shared with you' : 'Your listening room'}</span>
+        <h1 id="landing-title" className="landing-title">{invite ? <>Press play on <em>{invite.playlist.name}</em>.</> : <>Rewind your <em>memories</em>.</>}</h1>
+        <p className="landing-lede">{invite
+          ? `${invite.sharedBy} shared this playlist with you. Sign in and connect Spotify Premium, and it will be waiting on your deck.`
+          : 'Your Spotify playlists on a tape deck or a turntable. Real buttons, real ritual, right in your browser.'}</p>
 
-          {invite && <div className="invite-card">
-            {invite.playlist.image ? <img src={invite.playlist.image} alt=""/> : <span className="art-fallback"><MusicIcon/></span>}
-            <span className="row-copy"><strong>{invite.playlist.name}</strong><small>{invite.playlist.owner}{invite.playlist.total ? ` · ${invite.playlist.total} tracks` : ''} · shared by {invite.sharedBy}</small></span>
-          </div>}
-          {inviteError && <p className="inline-error">{inviteError}</p>}
+        {invite && <div className="invite-card">
+          {invite.playlist.image ? <img src={invite.playlist.image} alt=""/> : <span className="art-fallback"><MusicIcon/></span>}
+          <span className="row-copy"><strong>{invite.playlist.name}</strong><small>{invite.playlist.owner}{invite.playlist.total ? ` · ${invite.playlist.total} tracks` : ''} · shared by {invite.sharedBy}</small></span>
+        </div>}
+        {inviteError && <p className="inline-error">{inviteError}</p>}
 
-          <div className="landing-cta">
-            {signIn}
-            {!signInAvailable && <p className="hint">Sign-in is not configured on this server yet.</p>}
-          </div>
+        <div className="landing-cta">
+          <a className="primary-button big" href={signInHref} aria-disabled={!signInAvailable}><UserIcon/> Sign in with Google</a>
           <ol className="landing-steps" aria-label="How it works">
-            <li><span>1</span>Sign in with Google</li>
-            <li><span>2</span>Connect Spotify Premium, once</li>
-            <li><span>3</span>Choose a deck and press play</li>
+            <li><span>1</span>Sign in</li>
+            <li><span>2</span>Connect Spotify once</li>
+            <li><span>3</span>Press play</li>
           </ol>
         </div>
+        {!signInAvailable && <p className="hint">Sign-in is not configured on this server yet.</p>}
+      </section>
 
-        <div className="landing-art" aria-hidden="true">
-          <FadeImage className="landing-deck" src={IMAGES.cassetteDeck}/>
+      <div className="landing-art" aria-hidden="true">
+        <div className="landing-art-stage">
           <FadeImage className="landing-turntable" src={IMAGES.turntablePlaying}/>
+          <FadeImage className="landing-deck" src={IMAGES.cassetteDeck}/>
         </div>
-      </section>
+      </div>
 
-      <section className="landing-features" aria-label="What you get">
-        {FEATURES.map(([Icon, title, body]) => <article key={title}><span className="feature-icon"><Icon/></span><h2>{title}</h2><p>{body}</p></article>)}
-      </section>
+      <ul className="landing-features" aria-label="What you get">
+        {FEATURES.map(([Icon, title, body]) => <li key={title}><span className="feature-icon"><Icon/></span><span><strong>{title}</strong><small>{body}</small></span></li>)}
+      </ul>
     </main>
 
-    <footer className="landing-foot">
-      <span className="powered"><i aria-hidden="true"/>Powered by Spotify</span>
-      <span>Playback needs a Spotify Premium account. Sign-in happens on Google and Spotify; your passwords never touch Retro Play.</span>
+    <footer className="landing-foot landing-wrap">
+      <span className="landing-powered"><i aria-hidden="true"/>Powered by Spotify</span>
+      <span>Needs Spotify Premium · Your passwords never touch Retro Play</span>
     </footer>
     <Toasts toasts={toasts} onDismiss={onDismissToast}/>
   </div>;

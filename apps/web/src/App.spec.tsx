@@ -17,7 +17,7 @@ describe('Cassete UI', () => {
     history.replaceState({}, '', '/');
     render(<App />);
     expect(screen.getByRole('status', { name: /loading retro play/i })).toBeInTheDocument();
-    expect(await screen.findByRole('heading', { level: 1, name: /choose your machine.*press play/i })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { level: 1, name: /rewind your memories/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /sign in with google/i })).toHaveAttribute('href', '/auth/google/login');
     expect(screen.getByRole('link', { name: /^sign in$/i })).toHaveAttribute('href', '/auth/google/login');
     expect(screen.queryByRole('complementary', { name: /playlist library/i })).not.toBeInTheDocument();

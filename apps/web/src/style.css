@@ -397,37 +397,76 @@ kbd { display: inline-grid; place-items: center; min-width: 24px; height: 24px; 
 /* ---------- Landing (signed-out visitors) ---------- */
 .splash { height: 100dvh; display: grid; place-items: center; }
 .splash .brand-mark { transform: scale(1.6); animation: pulse 1.6s ease-in-out infinite; }
-.landing { height: 100dvh; overflow-y: auto; display: flex; flex-direction: column; }
-.landing-bar { position: sticky; top: 0; z-index: 5; background: color-mix(in srgb, var(--bg) 82%, transparent); backdrop-filter: blur(8px); }
-.landing-main { flex: 1; width: min(1180px, 100%); margin: 0 auto; padding: 24px 24px 40px; }
-.landing-hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); align-items: center; gap: 40px; min-height: min(640px, calc(100dvh - 160px)); }
-.landing-copy { display: grid; justify-items: start; gap: 18px; animation: rise .35s ease; }
+
+/* One screen, never scrolls: rows are bar / content / footer, and sizes scale with the viewport height so the
+   whole pitch is visible at first sight. Short screens drop the least important parts instead of overflowing. */
+.landing { height: 100dvh; overflow: hidden; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; }
+.landing-wrap { width: min(1360px, 100%); margin-inline: auto; padding-inline: clamp(16px, 4vw, 48px); }
+.landing-bar { display: flex; align-items: center; justify-content: space-between; height: clamp(56px, 9vh, 80px); }
+.landing-bar .brand { font-size: clamp(19px, 2.6vh, 23px); }
+.landing-bar-actions { display: flex; align-items: center; gap: 8px; }
+/* Scoped so the app's phone rule that turns .ghost-button into a 38px icon button never squashes it. */
+.landing-bar .landing-signin { width: auto; height: 38px; padding: 0 18px; font-weight: 600; color: var(--ink); text-decoration: none; }
+.landing-main { min-height: 0; display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.3fr); grid-template-rows: minmax(0, 1fr) auto; grid-template-areas: "copy art" "features features"; column-gap: clamp(16px, 2.5vw, 48px); row-gap: clamp(10px, 2.6vh, 32px); padding-block: clamp(4px, 1.5vh, 20px) clamp(10px, 2.5vh, 28px); }
+.landing-copy { grid-area: copy; align-self: center; display: grid; justify-items: start; gap: clamp(10px, 2.2vh, 22px); min-width: 0; animation: rise .35s ease; }
 .landing-copy .eyebrow { display: inline-flex; align-items: center; gap: 8px; }
 .landing-copy .status-dot { background: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
-.landing-title { margin: 0; font: 500 clamp(40px, 5.6vw, 72px)/1.02 var(--serif); letter-spacing: -.02em; color: var(--ink); text-wrap: balance; }
+.landing-title { margin: 0; font: 500 clamp(38px, min(6.2vw, 10.5vh), 96px)/.98 var(--serif); letter-spacing: -.025em; color: var(--ink); text-wrap: balance; }
 .landing-title em { font-style: italic; color: var(--accent); }
-.landing-lede { margin: 0; max-width: 46ch; color: var(--ink-2); font-size: 16.5px; line-height: 1.55; }
-.landing-cta { display: grid; justify-items: start; gap: 6px; margin-top: 4px; }
+.landing-lede { margin: 0; max-width: 42ch; color: var(--ink-2); font-size: clamp(14.5px, 2vh, 18px); line-height: 1.5; }
+.landing-cta { display: grid; justify-items: start; gap: clamp(10px, 1.8vh, 16px); margin-top: clamp(0px, 1vh, 8px); }
 .landing-cta .primary-button svg { width: 18px; height: 18px; }
-.landing-steps { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 0; padding: 0; list-style: none; color: var(--muted); font-size: 13px; }
-.landing-steps li { display: inline-flex; align-items: center; gap: 8px; }
-.landing-steps span { display: inline-grid; place-items: center; width: 22px; height: 22px; border: 1px solid var(--line); border-radius: 50%; font: 500 11px var(--mono); color: var(--ink-2); }
-.invite-card { display: flex; align-items: center; gap: 12px; width: min(440px, 100%); padding: 10px 14px 10px 10px; border: 1px solid var(--line-soft); border-left: 3px solid var(--accent); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow-1); }
-.invite-card img, .invite-card .art-fallback { width: 52px; height: 52px; flex: none; border-radius: 6px; object-fit: cover; }
+.landing-steps { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0; padding: 0; list-style: none; color: var(--muted); font-size: 13px; }
+.landing-steps li { display: inline-flex; align-items: center; gap: 7px; }
+.landing-steps span { display: inline-grid; place-items: center; width: 20px; height: 20px; border: 1px solid var(--line); border-radius: 50%; font: 500 10.5px var(--mono); color: var(--ink-2); }
+.invite-card { display: flex; align-items: center; gap: 12px; width: min(440px, 100%); padding: 8px 14px 8px 8px; border: 1px solid var(--line-soft); border-left: 3px solid var(--accent); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow-1); }
+.invite-card img, .invite-card .art-fallback { width: 46px; height: 46px; flex: none; border-radius: 6px; object-fit: cover; }
 .invite-card .row-copy { min-width: 0; display: grid; }
-.invite-card strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.invite-card strong, .invite-card small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .invite-card small { color: var(--muted); font-size: 12.5px; }
-.landing-art { position: relative; aspect-ratio: 3 / 2; isolation: isolate; }
-.landing-art::before { content: ''; position: absolute; inset: -6% -8%; z-index: -1; background: var(--spot); }
-.landing-art img { position: absolute; object-fit: contain; filter: var(--machine-shadow); }
-.landing-deck { left: 0; bottom: 4%; width: 78%; z-index: 2; }
-.landing-turntable { right: 0; top: 0; width: 58%; opacity: .92; }
-.landing-features { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 28px; }
-.landing-features article { padding: 20px; border: 1px solid var(--line-soft); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow-1); }
-.landing-features h2 { margin: 12px 0 6px; font: 500 19px var(--serif); }
-.landing-features p { margin: 0; color: var(--muted); font-size: 14px; }
-.feature-icon { display: inline-grid; place-items: center; width: 38px; height: 38px; border-radius: 10px; background: var(--accent-soft); color: var(--accent); }
-.landing-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 20px; padding: 18px 24px calc(18px + env(safe-area-inset-bottom)); border-top: 1px solid var(--line-soft); color: var(--muted); font-size: 12.5px; }
+/* The art is the largest 3:2 box that fits the space its grid cell has left (like .machine-frame), so the photos
+   shrink as a whole on short screens instead of being squeezed or cropped. */
+.landing-art { grid-area: art; min-height: 0; display: flex; align-items: center; justify-content: center; position: relative; isolation: isolate; container-type: size; }
+.landing-art::before { content: ''; position: absolute; inset: 0 -6%; z-index: -1; background: var(--spot); }
+.landing-art-stage { position: relative; width: min(100cqw, 150cqh); aspect-ratio: 3 / 2; }
+.landing-art-stage img { position: absolute; object-fit: contain; filter: var(--machine-shadow); }
+.landing-turntable { right: 0; top: 0; width: 64%; }
+.landing-deck { left: 0; bottom: 0; width: 76%; }
+.landing-features { grid-area: features; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(8px, 1.5vw, 16px); margin: 0; padding: 0; list-style: none; }
+.landing-features li { display: flex; align-items: center; gap: 12px; padding: clamp(10px, 1.6vh, 16px) 16px; border: 1px solid var(--line-soft); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow-1); min-width: 0; }
+.landing-features strong { display: block; font: 500 clamp(15px, 2vh, 17px)/1.2 var(--serif); }
+.landing-features small { display: block; margin-top: 2px; color: var(--muted); font-size: 12.5px; line-height: 1.35; }
+.feature-icon { display: inline-grid; place-items: center; width: 36px; height: 36px; flex: none; border-radius: 10px; background: var(--accent-soft); color: var(--accent); }
+.feature-icon svg { width: 18px; height: 18px; }
+.landing-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 20px; padding-block: 12px calc(12px + env(safe-area-inset-bottom)); border-top: 1px solid var(--line-soft); color: var(--muted); font-size: 12px; }
+.landing-powered { display: inline-flex; align-items: center; gap: 7px; font: 500 11px var(--mono); letter-spacing: .06em; }
+.landing-powered i { width: 8px; height: 8px; border-radius: 50%; background: #1db954; }
+
+/* Shorter screens: tighten first, then drop the feature blurbs, then the features and steps. */
+@media (max-height: 780px) { .landing-features small { display: none; } }
+@media (max-height: 620px) { .landing-features, .landing-steps { display: none; } .landing-main { grid-template-areas: "copy art"; grid-template-rows: minmax(0, 1fr); } }
+
+/* Tablets and phones: one column with the art on top; it shrinks first, so the copy and sign-in always fit. */
+@media (max-width: 900px) {
+  .landing-main { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto auto; grid-template-areas: "art" "copy" "features"; }
+  .landing-copy { align-self: end; }
+  .landing-features li { flex-direction: column; align-items: flex-start; text-align: left; gap: 8px; }
+}
+@media (max-width: 900px) and (max-height: 620px) { .landing-main { grid-template-areas: "art" "copy"; grid-template-rows: minmax(0, 1fr) auto; } }
+@media (max-width: 560px) {
+  .landing-title { font-size: clamp(34px, min(11vw, 6.4vh), 52px); }
+  .landing-lede { font-size: 14.5px; }
+  .landing-cta, .landing-cta .primary-button { width: 100%; justify-content: center; }
+  .landing-steps { justify-content: center; width: 100%; font-size: 12px; gap: 4px 12px; }
+  .landing-features { gap: 8px; }
+  .landing-features li { padding: 10px; gap: 6px; }
+  .landing-features strong { font-size: 13.5px; }
+  .landing-features small { display: none; }
+  .feature-icon { width: 30px; height: 30px; border-radius: 8px; }
+  .landing-foot { justify-content: center; text-align: center; font-size: 11.5px; }
+  .landing-powered { display: none; }
+}
+@media (max-width: 560px) and (max-height: 700px) { .landing-features { display: none; } .landing-main { grid-template-areas: "art" "copy"; grid-template-rows: minmax(0, 1fr) auto; } }
 
 /* ---------- Account: avatar, profile dialog, onboarding, resume ---------- */
 .avatar { display: inline-grid; place-items: center; flex: none; overflow: hidden; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-weight: 700; letter-spacing: .02em; }
@@ -600,11 +639,6 @@ kbd { display: inline-grid; place-items: center; min-width: 24px; height: 24px; 
 }
 
 /* ---------- Responsive: phones get one focused view at a time ---------- */
-@media (max-width: 960px) {
-  .landing-hero { grid-template-columns: minmax(0, 1fr); gap: 18px; min-height: 0; }
-  .landing-art { order: -1; width: min(560px, 100%); justify-self: center; }
-}
-
 @media (max-width: 760px) {
   .topbar { height: 52px; padding: 0 12px; }
   .brand { font-size: 19px; }
@@ -642,10 +676,6 @@ kbd { display: inline-grid; place-items: center; min-width: 24px; height: 24px; 
   .liner-notes { padding-bottom: 6px; }
   .welcome-points { flex-direction: column; align-items: center; }
   .account-button { padding: 0 4px; }
-  .landing-main { padding: 12px 16px 28px; }
-  .landing-features { grid-template-columns: minmax(0, 1fr); }
-  .landing-foot { padding-left: 16px; padding-right: 16px; }
-  .landing-cta, .landing-cta .primary-button { width: 100%; justify-content: center; }
   .resume-card { flex-wrap: wrap; }
   .resume-card .primary-button { width: 100%; justify-content: center; }
   .profile-foot { justify-content: center; }
