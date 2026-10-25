@@ -1,0 +1,22 @@
+{
+  "name": "cassete-phase-one",
+  "private": true,
+  "workspaces": [
+    "apps/api",
+    "apps/web"
+  ],
+  "scripts": {
+    "dev": "concurrently -k -n api,web -c green,cyan \"npm:dev:api\" \"npm:dev:web\"",
+    "dev:api": "npm --workspace @cassete/api run start:dev",
+    "dev:web": "npm --workspace @cassete/web run dev",
+    "build": "npm run build --workspace @cassete/api && npm run build --workspace @cassete/web",
+    "test": "npm run test --workspace @cassete/api && npm run test --workspace @cassete/web"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "typescript": "^5.8.3"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
