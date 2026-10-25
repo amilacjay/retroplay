@@ -12,15 +12,17 @@ describe('Cassete UI', () => {
   });
   const signedIn = { authenticated: true, csrf: 'csrf', user: { name: 'Ada', googleName: 'Ada', email: 'ada@example.com', picture: null, createdAt: 0 }, preferences: {}, nowPlaying: null };
 
-  it('asks a signed-out visitor to sign in with Google first', async () => {
+  it('shows signed-out visitors a landing page with Google sign-in instead of the deck', async () => {
     window.fetch = respond({ '/api/session': { authenticated: false, signInAvailable: true } }) as any;
     history.replaceState({}, '', '/');
     render(<App />);
-    expect(screen.getByRole('heading', { name: /pick a side.*press play/i })).toBeInTheDocument();
-    expect(await screen.findByRole('link', { name: /sign in with google/i })).toHaveAttribute('href', '/auth/google/login');
+    expect(screen.getByRole('status', { name: /loading retro play/i })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { level: 1, name: /pick a side.*press play/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /sign in with google/i })).toHaveAttribute('href', '/auth/google/login');
     expect(screen.getByRole('link', { name: /^sign in$/i })).toHaveAttribute('href', '/auth/google/login');
+    expect(screen.queryByRole('complementary', { name: /playlist library/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('textbox', { name: /search playlists/i })).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: /connect spotify/i })).not.toBeInTheDocument();
-    expect(screen.getByRole('textbox', { name: /search playlists/i })).toBeDisabled();
   });
 
   it('asks a signed-in user to connect Spotify before playing', async () => {
@@ -40,8 +42,9 @@ describe('Cassete UI', () => {
     }) as any;
     history.replaceState({}, '', '/s/abcdefgh12');
     render(<App />);
-    expect(await screen.findByRole('heading', { name: 'Night Drive' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { level: 1, name: /press play on night drive/i })).toBeInTheDocument();
     expect(screen.getByText(/grace shared this playlist with you/i)).toBeInTheDocument();
+    expect(screen.getByText(/shared by grace/i)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /sign in with google/i })).toHaveAttribute('href', '/auth/google/login?returnTo=%2Fs%2Fabcdefgh12');
     history.replaceState({}, '', '/');
   });

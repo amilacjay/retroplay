@@ -18,7 +18,7 @@ type StageProps = {
   authenticated: boolean; checking: boolean; status: PlayerStatus; playback: SpotifyState | null; playerError: string; onDismissError: () => void; onReconnect: () => void;
   account: Account; invite: SharedPlaylist | null; inviteError: string; resume: { nowPlaying: NowPlaying; onResume: () => void; busy: boolean } | null;
 };
-type Account = { signedIn: boolean; name?: string; signInHref: string; connectHref: string; signInAvailable: boolean };
+type Account = { name?: string; connectHref: string };
 
 const FIT_OPTIONS: [CoverFit, string][] = [['cover', 'Fill the window'], ['fit-width', 'Fit width'], ['fit-height', 'Fit height · full card, pan sideways'], ['stretch', 'Stretch'], ['title', 'Typeset title only']];
 
@@ -84,7 +84,7 @@ export function Stage(props: StageProps) {
         <span className="eyebrow"><i className={`status-dot ${status === 'ready' ? 'is-ready' : ''}`}/>{!authenticated ? (props.invite ? 'Shared with you' : 'Standby') : status === 'ready' ? 'Deck ready' : status === 'error' ? 'Deck needs attention' : 'Warming up'}</span>
         <h1 className="liner-title">{authenticated ? (status === 'ready' ? 'Drop a playlist on the deck.' : 'Warming up the valves…') : props.invite ? props.invite.playlist.name : 'Pick a side. Press play.'}</h1>
         <p className="liner-artist">{authenticated ? (status === 'ready' ? 'Choose from your library, or press / to search.' : 'Spotify is connecting this browser as a speaker.')
-          : props.invite ? `${props.invite.sharedBy} shared this playlist with you. Sign in and connect Spotify to listen on your own account.`
+          : props.invite ? `${props.invite.sharedBy} shared this playlist with you. Connect Spotify to listen on your own account.`
           : 'Stream your Spotify playlists through a tape deck or a turntable — real buttons, real ritual, right in your browser.'}</p>
         {props.inviteError && <p className="inline-error invite-error"><AlertIcon/>{props.inviteError}</p>}
         {!authenticated && !props.checking && <Welcome account={props.account}/>}
@@ -94,16 +94,8 @@ export function Stage(props: StageProps) {
   </section>;
 }
 
-/** Onboarding: sign in to Retro Play with Google first, then connect Spotify once. */
+/** Onboarding for a signed-in profile that has not connected Spotify yet (signed-out visitors see the landing page). */
 function Welcome({ account }: { account: Account }) {
-  if (!account.signedIn) return <div className="welcome">
-    <a className="primary-button big" href={account.signInHref} aria-disabled={!account.signInAvailable}>Sign in with Google</a>
-    <ul className="welcome-points">
-      <li>Your profile keeps your deck, theme, and last song</li>
-      <li>Then connect Spotify <b>Premium</b> to play</li>
-    </ul>
-    {!account.signInAvailable && <p className="hint">Google sign-in is not configured on this server yet.</p>}
-  </div>;
   return <div className="welcome">
     <ol className="onboarding-steps" aria-label="Get started">
       <li className="is-done"><span>1</span>Signed in{account.name ? ` as ${account.name}` : ''}</li>

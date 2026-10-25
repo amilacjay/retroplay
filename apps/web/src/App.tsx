@@ -19,6 +19,7 @@ import { Stage } from './components/Stage';
 import { Controls, PlayerDock, SleepTimerMenu, VolumeControl } from './components/PlayerDock';
 import { ShortcutsDialog, Toasts, TopBar, type Appearance } from './components/Chrome';
 import { ProfileDialog } from './components/Profile';
+import { Landing, Splash } from './components/Landing';
 import { CassetteIcon, LibraryIcon, ListIcon } from './components/Icons';
 
 export { SessionCard } from './components/Library';
@@ -94,7 +95,7 @@ export default function App() {
   }, [appearance]);
 
   const refreshSession = useCallback(async () => {
-    try { const response = await fetch('/api/session', { credentials: 'include' }); if (!response.ok) throw new Error(); setSession(await response.json()); }
+    try { const response = await fetch('/api/session', { credentials: 'include', signal: AbortSignal.timeout(10_000) }); if (!response.ok) throw new Error(); setSession(await response.json()); }
     catch { setSession({ authenticated: false }); }
     finally { setChecking(false); }
   }, []);
@@ -286,9 +287,15 @@ export default function App() {
   const artwork = currentTrack?.album.images[0]?.url ?? playlist?.image ?? tracks[0]?.image ?? null;
   const coverTitle = currentTrack?.name ?? playlist?.name ?? 'Retro Play album';
 
+  const toggleAppearance = () => setAppearance(value => value === 'dark' ? 'light' : 'dark');
+  // Signed-out visitors get the landing page; the deck, library, and player are for signed-in profiles only.
+  if (checking) return <Splash/>;
+  if (!session.authenticated) return <Landing appearance={appearance} onAppearance={toggleAppearance} signInHref={signInHref} signInAvailable={session.signInAvailable !== false}
+    invite={invite} inviteError={inviteError} toasts={toasts} onDismissToast={dismiss}/>;
+
   return <div className="app-shell">
     <a className="skip-link" href="#playlist-search">Skip to search</a>
-    <TopBar session={session} checking={checking} appearance={appearance} onAppearance={() => setAppearance(value => value === 'dark' ? 'light' : 'dark')} onProfile={() => setShowProfile(true)} signInHref={signInHref}/>
+    <TopBar session={session} checking={checking} appearance={appearance} onAppearance={toggleAppearance} onProfile={() => setShowProfile(true)} signInHref={signInHref}/>
     <main className="workspace" data-view={activeView}>
       <Library ref={searchRef} csrf={session.csrf} authenticated={connected} checking={checking} status={player.status} canPlay={canStart && !busy}
         activePlaylistId={playlist?.id ?? ''} playingContextUri={playback?.context?.uri} recents={recents}
@@ -297,7 +304,7 @@ export default function App() {
         cover={{ fit: coverFit, showTitle: showCoverTitle, position: coverPositions[skin.id] ?? skin.cover, onFit: setCoverFit, onShowTitle: setShowCoverTitle, onPosition: position => setCoverPositions(current => ({ ...current, [skin.id]: position })), pan: coverPan[playerTheme] ?? 50, onPan: pan => setCoverPan(current => ({ ...current, [playerTheme]: pan })),
           onReset: () => { setCoverPositions(current => ({ ...current, [skin.id]: skin.cover })); setCoverPan(current => ({ ...current, [playerTheme]: 50 })); } }}
         authenticated={connected} checking={checking} status={player.status} playback={playback} playerError={player.error} onDismissError={() => player.setError('')} onReconnect={player.reconnect}
-        account={{ signedIn: session.authenticated, name: session.user?.name, signInHref, connectHref, signInAvailable: session.authenticated || session.signInAvailable !== false }} invite={invite} inviteError={inviteError} resume={resumeOffer}/>
+        account={{ name: session.user?.name, connectHref }} invite={invite} inviteError={inviteError} resume={resumeOffer}/>
       <TrackPanel playlist={playlist} tracks={tracks} total={trackTotal} loading={tracksLoading} error={tracksError} busy={busy} canPlay={canStart} playback={playback}
         onPlay={trackUri => { if (playlist) void startPlayback(playlist, trackUri); }} onShufflePlay={() => void shufflePlay()}
         onLoadMore={() => { if (playlist) void loadTracks(playlist.id, tracks.length); }} onRetry={() => { if (playlist) openPlaylist(playlist); }}
