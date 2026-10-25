@@ -27,8 +27,8 @@
 # When PUBLIC_HOST is a different name (a Cloudflare Tunnel domain), this address redirects there, so OAuth state cookies
 # and callbacks always use one hostname.
 {$SITE_ADDRESS} {
-	@elsewhere not host {$PUBLIC_HOST:{$SITE_ADDRESS}}
-	redir @elsewhere https://{$PUBLIC_HOST:{$SITE_ADDRESS}}{uri} 308
+	@elsewhere not host {$PUBLIC_HOST}
+	redir @elsewhere https://{$PUBLIC_HOST}{uri} 308
 	import app
 }
 
