@@ -30,7 +30,7 @@ export function Landing({ appearance, onAppearance, signInHref, signInAvailable,
       <section className="landing-hero" aria-labelledby="landing-title">
         <div className="landing-copy">
           <span className="eyebrow"><i className="status-dot" aria-hidden="true"/>{invite ? 'A playlist was shared with you' : 'Your listening room'}</span>
-          <h1 id="landing-title" className="landing-title">{invite ? <>Press play on <em>{invite.playlist.name}</em>.</> : <>Pick a side.<br/>Press play.</>}</h1>
+          <h1 id="landing-title" className="landing-title">{invite ? <>Press play on <em>{invite.playlist.name}</em>.</> : <>Choose your machine.<br/>Press play.</>}</h1>
           <p className="landing-lede">{invite
             ? `${invite.sharedBy} shared this playlist with you on Retro Play. Sign in, connect your Spotify Premium account, and it will be waiting on your deck.`
             : 'Stream your Spotify playlists through a tape deck or a turntable. Real buttons, real ritual, right in your browser.'}</p>

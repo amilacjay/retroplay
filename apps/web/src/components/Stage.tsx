@@ -82,7 +82,7 @@ export function Stage(props: StageProps) {
         <p className="liner-artist">{track.artists.map(artist => artist.name).join(', ')}</p>
       </> : <>
         <span className="eyebrow"><i className={`status-dot ${status === 'ready' ? 'is-ready' : ''}`}/>{!authenticated ? (props.invite ? 'Shared with you' : 'Standby') : status === 'ready' ? 'Deck ready' : status === 'error' ? 'Deck needs attention' : 'Warming up'}</span>
-        <h1 className="liner-title">{authenticated ? (status === 'ready' ? 'Drop a playlist on the deck.' : 'Warming up the valves…') : props.invite ? props.invite.playlist.name : 'Pick a side. Press play.'}</h1>
+        <h1 className="liner-title">{authenticated ? (status === 'ready' ? 'Drop a playlist on the deck.' : 'Warming up the valves…') : props.invite ? props.invite.playlist.name : 'Choose your machine. Press play.'}</h1>
         <p className="liner-artist">{authenticated ? (status === 'ready' ? 'Choose from your library, or press / to search.' : 'Spotify is connecting this browser as a speaker.')
           : props.invite ? `${props.invite.sharedBy} shared this playlist with you. Connect Spotify to listen on your own account.`
           : 'Stream your Spotify playlists through a tape deck or a turntable — real buttons, real ritual, right in your browser.'}</p>
