@@ -79,11 +79,11 @@ jobs:
           printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy && chmod 600 ~/.ssh/deploy
           printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
       - name: Upload compose file and deploy script
-        run: scp -i ~/.ssh/deploy docker-compose.yml deploy/remote-deploy.sh "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/opt/retroplay/"
+        run: scp -i ~/.ssh/deploy docker-compose.yml deploy/remote-deploy.sh "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:apps/retroplay/"
       - name: Pull and restart
         # The job's GITHUB_TOKEN (read:packages) goes over SSH on stdin for one pull; the script logs out afterwards.
         env:
           REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           printf '%s\n' "$REGISTRY_TOKEN" | ssh -i ~/.ssh/deploy "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
-            "IMAGE_TAG=${{ github.sha }} API_IMAGE=$API_IMAGE WEB_IMAGE=$WEB_IMAGE REGISTRY_USER=${{ github.actor }} bash /opt/retroplay/remote-deploy.sh"
+            "IMAGE_TAG=${{ github.sha }} API_IMAGE=$API_IMAGE WEB_IMAGE=$WEB_IMAGE REGISTRY_USER=${{ github.actor }} bash apps/retroplay/remote-deploy.sh"

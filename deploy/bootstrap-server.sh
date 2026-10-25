@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # One-time server setup for Retro Play (Ubuntu/Debian). Run as a sudo-capable user:
 #   bash bootstrap-server.sh
-# Installs Docker Engine + Compose from Docker's apt repository, prepares /opt/retroplay,
-# and creates /opt/retroplay/.env with generated secrets if it does not exist. Safe to re-run.
+# Installs Docker Engine + Compose from Docker's apt repository, prepares ~/apps/retroplay,
+# and creates ~/apps/retroplay/.env with generated secrets if it does not exist. Safe to re-run.
 set -euo pipefail
 
-APP_DIR=/opt/retroplay
+APP_DIR=${APP_DIR:-$HOME/apps/retroplay}
 APP_USER=${APP_USER:-$(id -un)}
 
 if ! command -v docker >/dev/null 2>&1; then
@@ -21,16 +21,15 @@ if ! command -v docker >/dev/null 2>&1; then
   sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
   sudo systemctl enable --now docker
 fi
-sudo usermod -aG docker "$APP_USER"
+id -nG "$APP_USER" | grep -qw docker || sudo usermod -aG docker "$APP_USER"
 
-sudo install -d -o "$APP_USER" -g "$APP_USER" -m 750 "$APP_DIR"
+install -d -m 750 "$APP_DIR"
 
 if [ ! -f "$APP_DIR/.env" ]; then
   secret() { openssl rand -base64 48 | tr -d '/+=\n' | cut -c1-48; }
   umask 077
   cat > "$APP_DIR/.env" <<EOF
 SITE_ADDRESS=${SITE_ADDRESS:-156-67-27-54.sslip.io}
-ACME_EMAIL=${ACME_EMAIL:-}
 SPOTIFY_CLIENT_ID=
 SPOTIFY_CLIENT_SECRET=
 GOOGLE_CLIENT_ID=

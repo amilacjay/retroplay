@@ -113,7 +113,7 @@ Production is `docker-compose.yml`:
 
 Google and Spotify both reject bare-IP callbacks, so the server uses the free `156-67-27-54.sslip.io` hostname (it resolves to 156.67.27.54). Point a real domain at the server later and change `SITE_ADDRESS`.
 
-**Pipeline** (`.github/workflows/ci-cd.yml`): every push and PR runs the tests and build. Pushes to `main` then build both images, push them to GHCR as `ghcr.io/amilacjay/retroplay-{api,web}:<sha>` and `:latest`, copy `docker-compose.yml` and `deploy/remote-deploy.sh` to `/opt/retroplay` over SSH, and run the script. It pulls that exact tag, restarts the stack, and waits for the API health check. The job's short-lived `GITHUB_TOKEN` is used for the pull and logged out afterwards.
+**Pipeline** (`.github/workflows/ci-cd.yml`): every push and PR runs the tests and build. Pushes to `main` then build both images, push them to GHCR as `ghcr.io/amilacjay/retroplay-{api,web}:<sha>` and `:latest`, copy `docker-compose.yml` and `deploy/remote-deploy.sh` to `~/apps/retroplay` over SSH, and run the script. It pulls that exact tag, restarts the stack, and waits for the API health check. The job's short-lived `GITHUB_TOKEN` is used for the pull and logged out afterwards.
 
 **Repository secrets** (Settings → Secrets and variables → Actions, in a `production` environment):
 
@@ -124,12 +124,12 @@ Google and Spotify both reject bare-IP callbacks, so the server uses the free `1
 | `DEPLOY_SSH_KEY` | private key allowed in `~deploy/.ssh/authorized_keys` |
 | `DEPLOY_KNOWN_HOSTS` | output of `ssh-keyscan 156.67.27.54` |
 
-**Server**: `deploy/bootstrap-server.sh` (run once) installs Docker from Docker's apt repository, creates `/opt/retroplay`, and writes `/opt/retroplay/.env` (mode 600) with a generated `APP_SECRET` and `POSTGRES_PASSWORD`. App secrets live only in that file, never in GitHub. Fill in the Spotify and Google values there (see `.env.production.example`), and register these callback URLs:
+**Server**: `deploy/bootstrap-server.sh` (run once) installs Docker from Docker's apt repository, creates `~/apps/retroplay`, and writes `~/apps/retroplay/.env` (mode 600) with a generated `APP_SECRET` and `POSTGRES_PASSWORD`. App secrets live only in that file, never in GitHub. Fill in the Spotify and Google values there (see `.env.production.example`), and register these callback URLs:
 
 - Spotify dashboard: `https://156-67-27-54.sslip.io/auth/callback`
 - Google OAuth client: `https://156-67-27-54.sslip.io/auth/google/callback`
 
-Manual operations on the server, from `/opt/retroplay`: `docker compose ps`, `docker compose logs -f api`, and `docker compose exec postgres pg_dump -U retroplay retroplay > backup.sql`.
+Manual operations on the server, from `~/apps/retroplay`: `docker compose ps`, `docker compose logs -f api`, and `docker compose exec postgres pg_dump -U retroplay retroplay > backup.sql`.
 
 ## Policy and distribution
 

@@ -2,7 +2,7 @@
 # Runs on the server from CI: pulls the images for IMAGE_TAG and restarts the stack.
 # A short-lived registry token arrives on stdin; it is used for one pull and then logged out, never written to disk.
 set -euo pipefail
-cd /opt/retroplay
+cd "$(dirname "$0")"
 : "${IMAGE_TAG:?IMAGE_TAG is required}"
 export IMAGE_TAG API_IMAGE WEB_IMAGE
 
