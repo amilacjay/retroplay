@@ -74,16 +74,26 @@ jobs:
         env:
           DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
           DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+        # Secrets pasted from Windows can carry \r or stray spaces; normalise them, then fail with a readable (non-secret) reason.
         run: |
           install -m 700 -d ~/.ssh
-          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy && chmod 600 ~/.ssh/deploy
-          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          printf '%s\n' "$DEPLOY_SSH_KEY" | tr -d '\r' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' > ~/.ssh/deploy && chmod 600 ~/.ssh/deploy
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" | tr -d '\r' | sed -e 's/^[[:space:]]*//' > ~/.ssh/known_hosts
+          host=$(printf '%s' "$DEPLOY_HOST" | tr -d '\r\n[:space:]'); user=$(printf '%s' "$DEPLOY_USER" | tr -d '\r\n[:space:]')
+          echo "DEPLOY_TARGET=$user@$host" >> "$GITHUB_ENV"
+          ssh-keygen -y -f ~/.ssh/deploy >/dev/null 2>&1 || { echo "::error::DEPLOY_SSH_KEY is not a readable private key (paste the whole file, including the BEGIN/END lines)."; exit 1; }
+          ssh-keygen -F "$host" -f ~/.ssh/known_hosts >/dev/null || { echo "::error::DEPLOY_KNOWN_HOSTS has no entry for $host."; exit 1; }
+          if ! out=$(ssh -i ~/.ssh/deploy -o BatchMode=yes -o ConnectTimeout=15 "$user@$host" true 2>&1); then
+            echo "::error::SSH to $user@$host failed: $(printf '%s' "$out" | tail -1)"; exit 1
+          fi
       - name: Upload compose file and deploy script
-        run: scp -i ~/.ssh/deploy docker-compose.yml deploy/remote-deploy.sh "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:apps/retroplay/"
+        run: scp -i ~/.ssh/deploy docker-compose.yml deploy/remote-deploy.sh "$DEPLOY_TARGET:apps/retroplay/"
       - name: Pull and restart
         # The job's GITHUB_TOKEN (read:packages) goes over SSH on stdin for one pull; the script logs out afterwards.
         env:
           REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          printf '%s\n' "$REGISTRY_TOKEN" | ssh -i ~/.ssh/deploy "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
+          printf '%s\n' "$REGISTRY_TOKEN" | ssh -i ~/.ssh/deploy "$DEPLOY_TARGET" \
             "IMAGE_TAG=${{ github.sha }} API_IMAGE=$API_IMAGE WEB_IMAGE=$WEB_IMAGE REGISTRY_USER=${{ github.actor }} bash apps/retroplay/remote-deploy.sh"
