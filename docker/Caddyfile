@@ -1,5 +1,4 @@
-# SITE_ADDRESS is the public hostname (e.g. 156-67-27-54.sslip.io); Caddy fetches and renews its Let's Encrypt certificate.
-{$SITE_ADDRESS} {
+(app) {
 	encode zstd gzip
 
 	@backend path /api/* /auth/*
@@ -22,4 +21,18 @@
 		Referrer-Policy "strict-origin-when-cross-origin"
 		-Server
 	}
+}
+
+# SITE_ADDRESS is the server's own hostname (e.g. 156-67-27-54.sslip.io); Caddy fetches and renews its Let's Encrypt certificate.
+# When PUBLIC_HOST is a different name (a Cloudflare Tunnel domain), this address redirects there, so OAuth state cookies
+# and callbacks always use one hostname.
+{$SITE_ADDRESS} {
+	@elsewhere not host {$PUBLIC_HOST:{$SITE_ADDRESS}}
+	redir @elsewhere https://{$PUBLIC_HOST:{$SITE_ADDRESS}}{uri} 308
+	import app
+}
+
+# Cloudflare Tunnel origin: cloudflared connects over the internal network as http://web:80 and Cloudflare terminates TLS.
+http://{$TUNNEL_HOSTNAME:tunnel.invalid} {
+	import app
 }

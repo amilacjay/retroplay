@@ -113,6 +113,8 @@ Production is `docker-compose.yml`:
 
 Google and Spotify both reject bare-IP callbacks, so the server uses the free `156-67-27-54.sslip.io` hostname (it resolves to 156.67.27.54). Point a real domain at the server later and change `SITE_ADDRESS`.
 
+**Cloudflare Tunnel (current public address: `https://retroplay.directchat.space`).** The optional `tunnel` service runs `cloudflared` with `TUNNEL_TOKEN` from the server's `.env` (enabled by `COMPOSE_PROFILES=tunnel`). In the Cloudflare dashboard, the tunnel's public hostname must point at **`http://web:80`**; Cloudflare terminates TLS and Caddy answers that hostname on plain HTTP inside the Docker network. `PUBLIC_HOST` (here `retroplay.directchat.space`) is the single hostname used for `WEB_ORIGIN` and both OAuth callbacks, and the sslip.io address 308-redirects to it so sign-in cookies never straddle two hostnames. With a tunnel, register `https://<PUBLIC_HOST>/auth/callback` with Spotify and `https://<PUBLIC_HOST>/auth/google/callback` with Google.
+
 **Pipeline** (`.github/workflows/ci-cd.yml`): every push and PR runs the tests and build. Pushes to `main` then build both images, push them to GHCR as `ghcr.io/amilacjay/retroplay-{api,web}:<sha>` and `:latest`, copy `docker-compose.yml` and `deploy/remote-deploy.sh` to `~/apps/retroplay` over SSH, and run the script. It pulls that exact tag, restarts the stack, and waits for the API health check. The job's short-lived `GITHUB_TOKEN` is used for the pull and logged out afterwards.
 
 **Repository secrets** (Settings → Secrets and variables → Actions, in a `production` environment):

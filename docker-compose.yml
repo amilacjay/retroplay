@@ -30,9 +30,10 @@ services:
       API_HOST: 0.0.0.0
       API_PORT: "3000"
       DATABASE_URL: postgres://retroplay:${POSTGRES_PASSWORD}@postgres:5432/retroplay
-      WEB_ORIGIN: https://${SITE_ADDRESS}
-      SPOTIFY_REDIRECT_URI: https://${SITE_ADDRESS}/auth/callback
-      GOOGLE_REDIRECT_URI: https://${SITE_ADDRESS}/auth/google/callback
+      # PUBLIC_HOST is the one hostname users and OAuth callbacks use; it defaults to SITE_ADDRESS.
+      WEB_ORIGIN: https://${PUBLIC_HOST:-${SITE_ADDRESS}}
+      SPOTIFY_REDIRECT_URI: https://${PUBLIC_HOST:-${SITE_ADDRESS}}/auth/callback
+      GOOGLE_REDIRECT_URI: https://${PUBLIC_HOST:-${SITE_ADDRESS}}/auth/google/callback
     depends_on:
       postgres:
         condition: service_healthy
@@ -45,6 +46,8 @@ services:
     restart: unless-stopped
     environment:
       SITE_ADDRESS: ${SITE_ADDRESS:?set SITE_ADDRESS in .env}
+      PUBLIC_HOST: ${PUBLIC_HOST:-${SITE_ADDRESS}}
+      TUNNEL_HOSTNAME: ${TUNNEL_HOSTNAME:-tunnel.invalid}
     ports:
       - "80:80"
       - "443:443"
@@ -54,6 +57,18 @@ services:
       - caddy_config:/config
     depends_on:
       - api
+
+  # Optional Cloudflare Tunnel (enable with COMPOSE_PROFILES=tunnel and TUNNEL_TOKEN in .env).
+  # Routes are managed in the Cloudflare dashboard; cloudflared reads the token from the environment, not its command line.
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    profiles: ["tunnel"]
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN:-}
+    depends_on:
+      - web
 
 volumes:
   pgdata:
