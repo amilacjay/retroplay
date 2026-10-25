@@ -11,6 +11,8 @@ echo "$TOKEN" | docker login ghcr.io -u "${REGISTRY_USER:?}" --password-stdin >/
 trap 'docker logout ghcr.io >/dev/null 2>&1 || true' EXIT
 
 docker compose pull
+# Record the deployed tag in .env, so a manual `docker compose up -d` restarts this version rather than a stale :latest.
+sed -i '/^IMAGE_TAG=/d' .env && echo "IMAGE_TAG=$IMAGE_TAG" >> .env
 docker compose up -d --remove-orphans
 docker image prune -f >/dev/null
 

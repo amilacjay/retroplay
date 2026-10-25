@@ -131,7 +131,7 @@ Google and Spotify both reject bare-IP callbacks, so the server uses the free `1
 - Spotify dashboard: `https://156-67-27-54.sslip.io/auth/callback`
 - Google OAuth client: `https://156-67-27-54.sslip.io/auth/google/callback`
 
-Manual operations on the server, from `~/apps/retroplay`: `docker compose ps`, `docker compose logs -f api`, and `docker compose exec postgres pg_dump -U retroplay retroplay > backup.sql`.
+The deploy script records the deployed commit as `IMAGE_TAG` in the server's `.env`, so a manual `docker compose up -d` restarts that version (not whatever `:latest` happens to be cached). Manual operations on the server, from `~/apps/retroplay`: `docker compose ps`, `docker compose logs -f api`, and `docker compose exec postgres pg_dump -U retroplay retroplay > backup.sql`.
 
 ## Policy and distribution
 
