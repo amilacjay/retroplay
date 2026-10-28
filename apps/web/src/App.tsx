@@ -20,6 +20,7 @@ import { Controls, PlayerDock, SleepTimerMenu, VolumeControl } from './component
 import { ShortcutsDialog, Toasts, TopBar, type Appearance } from './components/Chrome';
 import { ProfileDialog } from './components/Profile';
 import { Landing, Splash } from './components/Landing';
+import { Tour } from './components/Tour';
 import { CassetteIcon, LibraryIcon, ListIcon } from './components/Icons';
 
 export { SessionCard } from './components/Library';
@@ -64,6 +65,8 @@ export default function App() {
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [sharing, setSharing] = useState(false);
+  const [touring, setTouring] = useState(false);
+  const [tourSeen, setTourSeen] = useStoredState('retro-play-tour-seen', false);
   const { toasts, notify, dismiss } = useToasts();
   const searchRef = useRef<HTMLInputElement>(null);
   const activePlaylistId = useRef('');
@@ -287,6 +290,15 @@ export default function App() {
   const artwork = currentTrack?.album.images[0]?.url ?? playlist?.image ?? tracks[0]?.image ?? null;
   const coverTitle = currentTrack?.name ?? playlist?.name ?? 'Retro Play album';
 
+  // First visit with a working deck: show people around once the stage has had a moment to set up.
+  useEffect(() => {
+    if (!connected || tourSeen || touring) return;
+    const timer = window.setTimeout(() => startTour(), 900);
+    return () => window.clearTimeout(timer);
+  }, [connected, tourSeen]);
+  function startTour() { setShowShortcuts(false); setShowProfile(false); setMobileView('deck'); setTouring(true); }
+  const endTour = useCallback(() => { setTouring(false); setTourSeen(true); }, [setTourSeen]);
+
   const toggleAppearance = () => setAppearance(value => value === 'dark' ? 'light' : 'dark');
   // Signed-out visitors get the landing page; the deck, library, and player are for signed-in profiles only.
   if (checking) return <Splash/>;
@@ -295,7 +307,7 @@ export default function App() {
 
   return <div className="app-shell">
     <a className="skip-link" href="#playlist-search">Skip to search</a>
-    <TopBar session={session} checking={checking} appearance={appearance} onAppearance={toggleAppearance} onProfile={() => setShowProfile(true)} signInHref={signInHref}/>
+    <TopBar session={session} checking={checking} appearance={appearance} onAppearance={toggleAppearance} onProfile={() => setShowProfile(true)} onTour={startTour} signInHref={signInHref}/>
     <main className="workspace" data-view={activeView}>
       <Library ref={searchRef} csrf={session.csrf} authenticated={connected} checking={checking} status={player.status} canPlay={canStart && !busy}
         activePlaylistId={playlist?.id ?? ''} playingContextUri={playback?.context?.uri} recents={recents}
@@ -318,6 +330,7 @@ export default function App() {
       {([['library', 'Library', LibraryIcon], ['deck', 'Deck', CassetteIcon], ['tracks', 'Tracks', ListIcon]] as const).map(([view, label, Icon]) => <button type="button" key={view} className={activeView === view ? 'is-active' : ''} aria-current={activeView === view ? 'page' : undefined} onClick={() => setMobileView(view)}><Icon/>{label}</button>)}
     </nav>
     <Toasts toasts={toasts} onDismiss={dismiss}/>
+    <Tour open={touring} theme={playerTheme} artwork={artwork} onClose={endTour}/>
     <ShortcutsDialog open={showShortcuts} onClose={() => setShowShortcuts(false)}/>
     {session.authenticated && <ProfileDialog open={showProfile} onClose={() => setShowProfile(false)} session={session} connectHref={connectHref} notify={notify}
       onProfileChange={refreshSession} onSpotifyDisconnect={disconnectSpotify} onSignOut={signOut} onAccountDeleted={accountDeleted}/>}

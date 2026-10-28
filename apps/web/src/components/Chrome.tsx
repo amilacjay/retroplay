@@ -2,17 +2,18 @@ import { useEffect, useRef } from 'react';
 import { SHORTCUTS } from '../hooks/useKeyboardShortcuts';
 import type { Toast } from '../hooks/useToasts';
 import type { SessionInfo } from '../lib/api';
-import { AlertIcon, CheckIcon, CloseIcon, MoonIcon, SunIcon, UserIcon } from './Icons';
+import { AlertIcon, CheckIcon, CloseIcon, HelpIcon, MoonIcon, SunIcon, UserIcon } from './Icons';
 import { Avatar } from './Profile';
 
 export type Appearance = 'light' | 'dark';
 
-export function TopBar({ session, checking, appearance, onAppearance, onProfile, signInHref }: { session: SessionInfo; checking: boolean; appearance: Appearance; onAppearance: () => void; onProfile: () => void; signInHref: string }) {
+export function TopBar({ session, checking, appearance, onAppearance, onProfile, onTour, signInHref }: { session: SessionInfo; checking: boolean; appearance: Appearance; onAppearance: () => void; onProfile: () => void; onTour?: () => void; signInHref: string }) {
   const user = session.authenticated ? session.user : undefined;
   return <header className="topbar">
     <a className="brand" href="/" aria-label="Retro Play home"><span className="brand-mark" aria-hidden="true"><i/><i/></span><span>retro<span className="brand-play">play</span><span className="brand-dot">.</span></span></a>
     <div className="top-actions">
       <span className="powered" title="Playback and metadata provided by Spotify"><i aria-hidden="true"/>Powered by Spotify</span>
+      {onTour && <button type="button" className="icon-button" onClick={onTour} aria-label="Take the tour" title="Take the tour"><HelpIcon/></button>}
       <button type="button" className="icon-button" onClick={onAppearance} aria-label={appearance === 'dark' ? 'Switch to day mode' : 'Switch to night mode'} title={appearance === 'dark' ? 'Day mode' : 'Night mode'}>{appearance === 'dark' ? <SunIcon/> : <MoonIcon/>}</button>
       {user ? <button type="button" className="account-button" onClick={onProfile} aria-label={`Your profile (${user.name})`} title="Your profile"><Avatar name={user.name} picture={user.picture} size={28}/><span className="hide-narrow">{user.name.split(' ')[0]}</span></button>
         : <a className="primary-button" href={signInHref} aria-disabled={checking}><UserIcon/><span>Sign in</span></a>}

@@ -36,6 +36,7 @@ export const SuitcaseIcon = svg(<><rect x="2.5" y="6" width="19" height="14" rx=
 export const DjIcon = svg(<><rect x="2.5" y="3" width="19" height="18" rx="2"/><circle cx="10" cy="12" r="6.5"/><circle cx="10" cy="12" r="1.8"/><path d="M18.5 5.5v4l-4 6M18.5 13v5"/></>);
 export const LogoutIcon = svg(<path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l-5-5 5-5M5 12h11"/>);
 export const ShareIcon = svg(<path d="M12 3v12M7.5 7.5 12 3l4.5 4.5M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/>);
+export const HelpIcon = svg(<><circle cx="12" cy="12" r="9"/><path d="M9.5 9.3a2.6 2.6 0 0 1 5 .9c0 1.7-2.5 2.3-2.5 3.8M12 17h.01"/></>);
 export const UserIcon = svg(<><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></>);
 export const CopyIcon = svg(<><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></>);
 export const TrashIcon = svg(<path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/>);

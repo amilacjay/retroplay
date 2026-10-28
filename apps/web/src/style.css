@@ -376,6 +376,44 @@ kbd { display: inline-grid; place-items: center; min-width: 24px; height: 24px; 
 .key-sep { color: var(--faint); font-size: 12px; }
 .dialog-foot { margin: 0; padding: 10px 22px 18px; color: var(--muted); font-size: 12.5px; }
 
+/* ---------- First-visit tour (spotlight + callout; the page stays usable underneath) ---------- */
+.tour { position: fixed; inset: 0; z-index: 70; pointer-events: none; }
+.tour-spotlight { position: fixed; border-radius: 14px; box-shadow: 0 0 0 2px var(--accent), 0 0 0 7px var(--accent-soft), 0 0 0 200vmax #0c0a0899; transition: top .28s ease, left .28s ease, width .28s ease, height .28s ease; }
+.tour-spotlight.is-blank { top: 50%; left: 50%; width: 0; height: 0; box-shadow: 0 0 0 200vmax #0c0a0899; }
+.tour-card { position: fixed; padding: 18px 18px 14px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); color: var(--ink); box-shadow: var(--shadow-2); pointer-events: auto; animation: rise .2s ease; transition: top .28s ease, left .28s ease; }
+.tour-card h2 { margin: 6px 28px 6px 0; font: 500 21px/1.2 var(--serif); }
+.tour-card p { margin: 0; color: var(--ink-2); font-size: 13.5px; }
+.tour-card kbd { min-width: 20px; height: 20px; padding: 0 5px; font-size: 11px; vertical-align: 1px; }
+.tour-close { position: absolute; top: 8px; right: 8px; width: 30px; height: 30px; }
+.tour-close svg { width: 16px; height: 16px; }
+.tour-actions { display: flex; align-items: center; gap: 8px; margin-top: 16px; }
+.tour-actions .ghost-button, .tour-actions .primary-button { height: 34px; padding: 0 14px; font-size: 13px; }
+.tour-dots { display: flex; gap: 5px; margin-right: auto; }
+.tour-dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--line); transition: background-color .2s, width .2s; }
+.tour-dots i.is-current { width: 16px; border-radius: 3px; background: var(--accent); }
+.tour-hero { display: flex; gap: 10px; margin-bottom: 10px; color: var(--accent); }
+.tour-hero svg { width: 34px; height: 34px; }
+.tour-fits { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 2px 0 12px; }
+.tour-fit { display: grid; justify-items: center; gap: 5px; margin: 0; }
+.tour-fit figcaption { color: var(--muted); font: 500 9.5px/1.1 var(--mono); letter-spacing: .04em; text-align: center; text-transform: uppercase; }
+.tour-fit-card { position: relative; display: block; width: 100%; aspect-ratio: 1035 / 1467; border-radius: 4px; background: #f4ecdc; border: 1px solid #00000022; box-shadow: var(--shadow-1); overflow: hidden; }
+.tour-fits-vinyl .tour-fit-card { aspect-ratio: 1; border-radius: 3px; }
+/* The art window matches the J-card's measured paper bounds; fit height and stretch use the full card. */
+.tour-fit-window { position: absolute; left: 14%; top: 8%; width: 76.5%; height: 54%; overflow: hidden; background: #2a241c; }
+.tour-fits-vinyl .tour-fit-window { inset: 4%; width: auto; height: auto; }
+.tour-fit-fit-height .tour-fit-window, .tour-fit-stretch .tour-fit-window { height: 81.7%; }
+.tour-fit-window img, .tour-fit-placeholder { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.tour-fit-placeholder { background: radial-gradient(circle at 50% 45%, var(--amber) 0 22%, var(--accent) 23% 42%, #3b2a1c 43%); }
+.tour-fit-fit-width .tour-fit-window img, .tour-fit-fit-width .tour-fit-placeholder { inset: auto 0; top: 50%; height: auto; aspect-ratio: 1; object-fit: contain; transform: translateY(-50%); }
+.tour-fit-stretch .tour-fit-window img, .tour-fit-stretch .tour-fit-placeholder { object-fit: fill; }
+.tour-fit-pan { position: absolute; left: 50%; bottom: 4px; transform: translateX(-50%); padding: 0 4px; border-radius: 4px; background: #000a; color: #fff; font: 600 10px/1.4 var(--font); }
+.tour-fit-title { position: absolute; left: 14%; top: 8%; width: 76.5%; height: 81.7%; display: grid; align-content: center; gap: 4px; padding: 0 12%; background: #e9dcc2; }
+.tour-fits-vinyl .tour-fit-title { inset: 4%; width: auto; height: auto; }
+.tour-fit-title i { display: block; height: 3px; border-radius: 2px; background: #3a2f22; }
+.tour-fit-title i:nth-child(2) { height: 6px; }
+.tour-fit-title i:nth-child(3) { width: 60%; background: #a0907a; }
+.tour-fit-cover .tour-fit-window img, .tour-fit-cover .tour-fit-placeholder { transform: scale(1.12); }
+
 /* ---------- Model setup (shown while a player's photos download and decode) ---------- */
 .machine-setup { position: absolute; inset: 0; z-index: 4; display: grid; place-content: center; justify-items: center; gap: 10px; text-align: center; opacity: 0; transition: opacity .2s ease; }
 .machine-setup.is-visible { opacity: 1; }
